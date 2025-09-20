@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,51 +7,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            Int       @id @default(autoincrement())
-  username      String    @unique
-  email         String    @unique
-  password      String
-  profilePic    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@index([email])
-  tasks     Task[]
-}
-
 model Task {
-  id          Int       @id @default(autoincrement())
-  userId      Int
+  id          String     @id @default(uuid())
+  userId      String
   topic       String
   status      TaskStatus
-  createdAt   DateTime     @default(now())
+  createdAt   DateTime   @default(now())
   completedAt DateTime?
   error       String?
 
-  user        User?        @relation(fields: [userId], references: [id])
-  logs        Log[]
-  results     TaskResult[]
+  logs    Log[]
+  results TaskResult[]
 }
 
 model Log {
   id        Int      @id @default(autoincrement())
-  taskId    Int
+  taskId    String
   step      String
   message   String
   meta      Json?
   createdAt DateTime @default(now())
 
-  task      Task     @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
 
 model TaskResult {
-  id        Int   @id @default(autoincrement())
-  taskId    Int
+  id        String   @id @default(uuid())
+  taskId    String
   result    Json
   createdAt DateTime @default(now())
 
-  task      Task     @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
 
 enum TaskStatus {
