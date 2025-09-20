@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const reqStack = require('request-stack');
 const errorHandler = require('./middleware/errorHandler.js');
 const appRoutes = require('./routes/appRoutes.js');
+require('dotenv').config();
 
 // middleware
 app.use(morgan('dev'));
@@ -20,7 +21,7 @@ app.get('/', (req, res) => {
 //router
 app.use('/', appRoutes);
 
-//error handler
+//error handle
 app.use(errorHandler);
 
 
