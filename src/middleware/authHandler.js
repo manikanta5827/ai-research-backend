@@ -1,14 +1,14 @@
 
 const authHandler = async(req, res, next) =>{
-    const userId = req.headers['userId'];
+    const user = req.headers['user']; 
 
-    if(!userId) {
+    if(!user) {
         return res.status(400).json({
             status: "error",
             message: "user id required"
         })
     }
-    req.userId = userId;
+    req.user = user;
     next();
 }
 
