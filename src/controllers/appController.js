@@ -25,7 +25,7 @@ const triggerResearch = async (req, res) => {
 
     // now push it into queue
     myQueue.add('ai-agent-queue', task);
-    logger.info('pushed task to queue');
+    logger.info(`pushed task to queue ${task.id}`);
 
     res.status(201).json({
         status: "success",
