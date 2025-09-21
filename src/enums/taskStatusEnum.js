@@ -7,5 +7,8 @@ const taskStatus = Object.freeze({
     FAILED: "failed"
 })
 
+const isValidTaskStatus = (status) => {
+    return Object.values(taskStatus).includes(status);
+}
 
-module.exports = { taskStatus};
+module.exports = { taskStatus, isValidTaskStatus };
