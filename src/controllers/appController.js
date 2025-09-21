@@ -57,7 +57,64 @@ const listAllTopics = async (req,res) => {
     })
 }
 
+const getResultOfTopic = async (req, res) => {
+    const user = req.user;
+
+    const topicId = req.get('id');
+
+    if (!topicId || topicId === "") {
+        return res.status(404).json({
+            status: "error",
+            message: "topicId is required"
+        })
+    }
+
+    const topic = await prisma.task.findMany({
+        where: {
+            id: topicId,
+            user: user
+        },
+        select: {
+            user: true,
+            topic: true,
+            status: true,
+            progress: true,
+            createdAt: true,
+            completedAt: true,
+            error: true,
+            logs: {
+                select: {
+                    step: true,
+                    message: true,
+                    meta: true,
+                    createdAt: true
+                }
+            },
+            results: {
+                select: {
+                    result: true,
+                    createdAt: true
+                }
+            }
+        }
+    });
+
+    if (!topic) {
+        return res.status(404).json({
+            status: "success",
+            message: "topic not found"
+        })
+    }
+
+    return res.status(200).json({
+        status: "success",
+        message: "topic found",
+        topic: topic
+    })
+}
+
 module.exports = {
     triggerResearch,
-    listAllTopics
+    listAllTopics,
+    getResultOfTopic
 };
