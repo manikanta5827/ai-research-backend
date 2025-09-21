@@ -14,6 +14,11 @@ services:
     networks:
       - ai-research-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_research"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -25,6 +30,11 @@ services:
     networks:
       - ai-research-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   fastapi-server:
     build:
@@ -47,7 +57,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5434/ai_research
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_research
       REDIS_HOST_URL: redis
       FAST_API_MICROSERVICE_PATH: http://fastapi-server:8000
       PORT: 4000
@@ -55,9 +65,12 @@ services:
     networks:
       - ai-research-network
     depends_on:
-      - postgres
-      - redis
-      - fastapi-server
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      fastapi-server:
+        condition: service_started
     restart: unless-stopped
 
 volumes:
