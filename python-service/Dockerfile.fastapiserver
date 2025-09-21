@@ -1,0 +1,25 @@
+FROM python:3.13-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    libjpeg-dev \
+    libpng-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+COPY requirements.txt .
+
+# Installing dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY fastapi_server.py .
+
+EXPOSE 8000
+
+# run the server using uvicorn
+# add gunocorn also to spin multiple workers for better scalability
+CMD ["uvicorn", "fastapi_server:app", "--host", "0.0.0.0", "--port", "8000"]
