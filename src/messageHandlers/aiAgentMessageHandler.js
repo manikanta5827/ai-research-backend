@@ -58,7 +58,7 @@ const aiAgentMessageHandler = async (job) => {
         final_response.final_synthesis.keywords = response.keywords;
 
         await updateLogs(id, 'completion', `task succeeded`, { "num_articles": data.length, "response_length": response.length });
-        await updateProgress(id, 100, taskStatus.RUNNING, true);
+        await updateProgress(id, 100, taskStatus.SUCCEEDED, true);
         await updateFinalTaskResult(id, final_response);
 
         console.log(`topic fetching completed for the job of id::${job.id}`);
