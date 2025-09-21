@@ -31,7 +31,7 @@ app.use('/', appRoutes);
 app.use(errorHandler);
 
 
-const PORT = process.env.PORT || 3400;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
     console.log('HTTP server listening on port...', PORT);
 })
