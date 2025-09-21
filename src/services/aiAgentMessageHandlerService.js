@@ -97,8 +97,16 @@ async function generateSummaryUsingLLM(title, content) {
     let cleaned = response
         .replace(/```json\s*/gi, '')
         .replace(/```/g, '')
+        .replace(/^\s*```json\s*/gm, '')
+        .replace(/```\s*$/gm, '')
         .trim();
-    logger.info(cleaned);
+
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        cleaned = jsonMatch[0];
+    }
+
+    logger.info(`cleaned JSON: ${cleaned}`);
     try {
         response = JSON.parse(cleaned);
     } catch (err) {
@@ -135,8 +143,16 @@ async function generateSingleSummary(summary, keywords) {
     let cleaned = response
         .replace(/```json\s*/gi, '')
         .replace(/```/g, '')
+        .replace(/^\s*```json\s*/gm, '')
+        .replace(/```\s*$/gm, '')
         .trim();
-    logger.info(cleaned);
+
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+        cleaned = jsonMatch[0];
+    }
+
+    logger.info(`cleaned JSON: ${cleaned}`);
     try {
         response = JSON.parse(cleaned);
     } catch (err) {
