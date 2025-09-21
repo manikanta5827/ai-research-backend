@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 require('dotenv').config();
-
+const { logger } = require('../utils/winstonLogger.js');
 const { updateLogs } = require('../repository/logsRepository.js');
 const { updateProgress } = require('../repository/taskRepository.js');
 const { updateFinalTaskResult } = require("../repository/taskResultRepository.js")
