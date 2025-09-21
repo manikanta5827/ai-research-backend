@@ -1,64 +1,40 @@
-const { Worker } = require('bullmq');
-const connection = { host: '127.0.0.1', port: 6379 };
-const {logger} = require('../utils/winstonLogger.js');
+const { logger } = require("../utils/winstonLogger");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-const worker = new Worker(
-  'ai-agent-queue',
-  async job => {
-    logger.info('Processing job:', job.id, job.data);
+const aiAgentMessageHandler = async (job) => {
+    const topic = job.data.topic;
+    // validate the topic if it is less than 3 words then don't search
 
-    try {
-      await job.updateProgress(10);
-      logger.info('Job started - 10% complete');
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    return { result: "Done", taskId: job.data.id };
 
-      await job.updateProgress(50);
-      logger.info('Halfway through - 50% complete');
+}
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      await job.updateProgress(90);
-      logger.info('Almost done - 90% complete');
-
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      await job.updateProgress(100);
-      logger.info('Job completed:', job.id);
-
-      return { result: 'Done', taskId: job.data.id };
-    } catch (error) {
-      logger.error('Job processing failed:', error);
-      throw error;
+async function updateLogs(taskId, step, message, meta = {}) {
+    if (!taskId) {
+        logger.error("taskId not found")
+        throw new Error("taskId not found");
     }
-  },
-  { connection }
-);
 
-worker.on('ready', () => {
-  logger.info('Worker is ready and listening for jobs');
-});
+    if (!step) {
+        logger.error("step not found")
+        throw new Error("step not found");
+    }
 
-worker.on('error', (err) => {
-  logger.error('Worker error:', err);
-});
+    if (!message) {
+        logger.error("message not found")
+        throw new Error("message not passed")
+    }
 
-worker.on('stalled', (jobId) => {
-  logger.warn(`Job ${jobId} has stalled`);
-});
+    await prisma.log.create({
+        data: {
+            taskId,
+            step,
+            message,
+            meta
+        }
+    })
+}
 
-worker.on('progress', (job, progress) => {
-  logger.info(`Job ${job.id} progress: ${progress}%`);
-});
-
-worker.on('completed', job => {
-  logger.info(`Job ${job.id} has been completed`);
-});
-
-worker.on('failed', (job, err) => {
-  logger.error(`Job ${job.id} failed:`, err);
-});
-
-worker.on('connectionError', (err) => {
-  logger.error('Worker connection error:', err);
-});
+module.exports = aiAgentMessageHandler;
