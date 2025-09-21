@@ -13,9 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -38,6 +35,16 @@ jobs:
                 git clone https://github.com/manikanta5827/ai-research-backend.git
                 cd ai-research-backend
             fi
+            
+            # start Docker daemon if not running
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            
+            # add user to docker group if not already added
+            sudo usermod -aG docker ubuntu
+            
+            # ensure Docker is running
+            sudo systemctl status docker
             
             # stop existing containers
             docker compose down --remove-orphans
