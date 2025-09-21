@@ -12,6 +12,7 @@ model Task {
   user        String
   topic       String
   status      TaskStatus
+  progress    Int        @default(0)
   createdAt   DateTime   @default(now())
   completedAt DateTime?
   error       String?
