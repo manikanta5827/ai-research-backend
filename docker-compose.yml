@@ -16,6 +16,17 @@ services:
       - ai-research-network
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: ai-research-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-research-network
+    restart: unless-stopped
+
   fastapi-server:
     build:
       context: ./python-service
@@ -36,17 +47,20 @@ services:
       - "4000:4000"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5434/ai_research
+      REDIS_HOST_URL: redis
       FAST_API_MICROSERVICE_PATH: http://fastapi-server:8000
       PORT: 4000
     networks:
       - ai-research-network
     depends_on:
       - postgres
+      - redis
       - fastapi-server
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   ai-research-network:
