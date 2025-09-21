@@ -18,7 +18,7 @@ model Task {
   error       String?
 
   logs    Log[]
-  results TaskResult[]
+  results TaskResult?
 }
 
 model Log {
@@ -34,7 +34,7 @@ model Log {
 
 model TaskResult {
   id        String   @id @default(uuid())
-  taskId    String
+  taskId    String   @unique
   result    Json
   createdAt DateTime @default(now())
 
