@@ -1,5 +1,5 @@
 const { Queue } = require('bullmq');
-require('cors').config();
+require('dotenv').config();
 
 const REDIS_HOST_URL= process.env.REDIS_HOST_URL;
 

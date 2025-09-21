@@ -1,6 +1,14 @@
 const { Worker } = require('bullmq');
-const connection = { host: '127.0.0.1', port: 6379 };
+require('dotenv').config();
 const { logger } = require('../utils/winstonLogger.js');
+
+const REDIS_HOST_URL = process.env.REDIS_HOST_URL;
+
+if (!REDIS_HOST_URL) {
+  throw new Error("redis host is not specified in env file")
+}
+
+const connection = { host: REDIS_HOST_URL, port: 6379 };
 const aiAgentMessageHandler = require('../messageHandlers/aiAgentMessageHandler.js');
 const { taskStatus } = require('../enums/taskStatusEnum.js');
 const { updateProgress } = require('../repository/taskRepository.js');
@@ -30,7 +38,6 @@ worker.on('error', (err) => {
 
 worker.on('stalled', async (jobId) => {
   logger.warn(`Job ${jobId} has stalled`);
-  await updateProgress(jobId, 0, taskStatus.FAILED, true, "job stalled more than allowable limit");
 });
 
 worker.on('progress', (job, progress) => {
@@ -43,7 +50,7 @@ worker.on('completed', job => {
 
 worker.on('failed', async (job, err) => {
   logger.error(`Job ${job.id} failed:`, err);
-  await updateProgress(job.id, 0, taskStatus.FAILED, true, err);
+  await updateProgress(job.data.id, 0, taskStatus.FAILED, true, err);
 });
 
 worker.on('connectionError', (err) => {
