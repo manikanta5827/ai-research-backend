@@ -51,6 +51,7 @@ services:
       REDIS_HOST_URL: redis
       FAST_API_MICROSERVICE_PATH: http://fastapi-server:8000
       PORT: 4000
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     networks:
       - ai-research-network
     depends_on:
