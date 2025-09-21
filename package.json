@@ -5,15 +5,20 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "start:workers": "node src/services/workerService.js",
+    "start:workers:dev": "nodemon src/services/workerService.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/genai": "^1.20.0",
     "@prisma/client": "^6.16.2",
+    "axios": "^1.12.2",
     "bullmq": "^5.58.7",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "ioredis": "^5.7.0",
