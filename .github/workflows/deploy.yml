@@ -35,12 +35,10 @@ jobs:
                 git clone https://github.com/manikanta5827/ai-research-backend.git
                 cd ai-research-backend
             fi
-        
-      - name: Stop existing containers
-        run: |
+            
+            # Stop existing containers
             docker compose down --remove-orphans
             
-      - name: Build and start services
-        run: |
+            # Build and start services
             docker compose up -d --build
             EOF
