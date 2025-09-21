@@ -23,8 +23,18 @@ jobs:
       - name: Deploy over SSH
         run: |
             ssh -i ~/.ssh/deploy_key ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
-            cd /home/ubuntu/work/ai-research-backend
-            git pull origin main
+            # create directory structure if it doesn't exist
+            mkdir -p /home/ubuntu/work
+            cd /home/ubuntu/work
+            
+            # clone repository if it doesn't exist, otherwise pull updates
+            if [ -d "ai-research-backend" ]; then
+                cd ai-research-backend
+                git pull origin main
+            else
+                git clone https://github.com/manikanta5827/ai-research-backend.git
+                cd ai-research-backend
+            fi
         
       - name: Stop existing containers
         run: |
