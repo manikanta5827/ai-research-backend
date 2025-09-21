@@ -48,6 +48,11 @@ async function searchUsingDuckDuck(id, topic) {
     let { data } = await axios.post(`${FAST_API_MICROSERVICE_PATH}/search`, body, { headers });
     console.log(`got response from fast api service`);
 
+    if(data.length == 0) {
+        logger.info(`zero results found for the topic ${topic}`);
+        throw new Error(`zero results found for the topic ${topic}`);
+    }
+
     // filter wbsites which return empty content or null
     data = data.filter((webpage, index) => {
         if (webpage.title == null || webpage.title === "" || webpage.content == null || webpage.content === "") {
