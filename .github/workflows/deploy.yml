@@ -46,8 +46,8 @@ jobs:
             # ensure Docker is running
             sudo systemctl status docker
             
-            # stop existing containers
-            docker compose down --remove-orphans
+            # stop existing containers and remove volumes
+            docker compose down -v --remove-orphans
             
             # build and start services
             docker compose up -d --build
