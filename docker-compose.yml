@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai-research-postgres
+    environment:
+      POSTGRES_DB: ai_research
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - ai-research-network
+    restart: unless-stopped
+
+  fastapi-server:
+    build:
+      context: ./python-service
+      dockerfile: Dockerfile.fastapiserver
+    container_name: ai-research-fastapi
+    ports:
+      - "8000:8000"
+    networks:
+      - ai-research-network
+    restart: unless-stopped
+
+  nodejs-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.nodejsserver
+    container_name: ai-research-nodejs
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5434/ai_research
+      FAST_API_MICROSERVICE_PATH: http://fastapi-server:8000
+      PORT: 4000
+    networks:
+      - ai-research-network
+    depends_on:
+      - postgres
+      - fastapi-server
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  ai-research-network:
+    driver: bridge
