@@ -32,9 +32,32 @@ const triggerResearch = async (req, res) => {
         message: "topic added to queue",
         taskId: task.id
     })
+}
 
+const listAllTopics = async (req,res) => {
+    const user = req.user;
+
+    const topics = await prisma.task.findMany({
+        where:{
+            user
+        }
+    })
+
+    if(!topics) {
+        return res.status(200).json({
+            status: "success",
+            message: "no topics found"
+        })
+    }
+
+    return res.status(200).json({
+        status: "success",
+        message: "topics found",
+        topics
+    })
 }
 
 module.exports = {
-    triggerResearch
+    triggerResearch,
+    listAllTopics
 };

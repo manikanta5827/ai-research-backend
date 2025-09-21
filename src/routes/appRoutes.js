@@ -6,7 +6,7 @@ const appController = require('../controllers/appController.js');
 
 // all routes
 router.post('/research', authHandler, appController.triggerResearch);
-// router.get('/research', appController)
+router.get('/research',authHandler, appController.listAllTopics);
 
 
 
