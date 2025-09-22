@@ -89,8 +89,8 @@ async function generateSummaryUsingLLM(title, content) {
     // send content to llm and ask for keywords and summary in 1-2 lines
     const prompt = `I am passing you content of a webpage, i need summary and main keywords from it, send me response strictly in this way
     {
-        summary: "exactly 1-2 lines of summary of the above webpage content",
-        keywords: ["", ""] -> important keywords from the content
+        "summary": "exactly 1-2 lines of summary of the above webpage content",
+        "keywords": ["", ""]
     }
     inputs : title :: ${title} ,content = ${content}`;
 
@@ -135,8 +135,8 @@ async function generateSingleSummary(summary, keywords) {
     const prompt = `I am passing a array of summaries of different web pages and keywords, i need a single summary from all those array of summaries and a single array of keywords
     send me response strictly in this way
     {
-        summary: "exactly 1-3 lines of summary from all the group of summaries,
-        keywords: ["",""] -> important keywords from the array of keywords
+        "summary": "exactly 1-3 lines of summary from all the group of summaries",
+        "keywords": ["",""]
     }
     inputs : keywords : ${keywords} , summary :: ${summary}`;
 
