@@ -1,6 +1,43 @@
-# Ai-Research-Agent
-## This project is about how a llm would operate when a user send a query
-## It searches for the user query in different articles by web scrawling and then fetch the content and summarise it
-## our application works on the same way , when user searches for a query it searches for top 5 articles and fetch the content of each article and summarises each article using llm and at last generates a single summary and keywords 
+# AI Research Backend
 
-<!-- reademe change -->
+Turns a user topic into a quick research brief:
+- Finds relevant articles
+- Extracts content (FastAPI microservice)
+- Summarizes with Gemini
+- Returns a final summary and keywords
+
+## Run
+
+Prereqs: Docker, Docker Compose, GEMINI_API_KEY.
+
+1) Create `.env` in project root:
+```
+GEMINI_API_KEY=your_key_here
+```
+2) Start services:
+```
+docker compose up -d --build
+```
+3) API: `http://localhost:4000`
+
+## Endpoints
+
+- POST `/research` (headers: `user`, body: `{ "topic": "..." }`)
+- GET `/research` (headers: `user`)
+- GET `/research/:id` (headers: `user`)
+
+## Features
+
+- Web search + scraping (FastAPI)
+- Per-article LLM summaries (Gemini)
+- Final synthesis (summary + keywords)
+- Background queue (BullMQ + Redis)
+- Postgres via Prisma
+- Logging to `/app/logs/app.log`
+
+## Checklist
+
+- [x] API + background jobs + DB
+- [x] Dockerized (compose)
+- [x] CI/CD to EC2
+- [x] Frontend deployed (separate)
