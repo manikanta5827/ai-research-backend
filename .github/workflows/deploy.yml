@@ -30,7 +30,8 @@ jobs:
             # clone repository if it doesn't exist, otherwise pull updates
             if [ -d "ai-research-backend" ]; then
                 cd ai-research-backend
-                git pull origin main
+                git fetch origin main
+                git reset --hard origin/main
             else
                 git clone https://github.com/manikanta5827/ai-research-backend.git
                 cd ai-research-backend
@@ -38,17 +39,10 @@ jobs:
             
             # start Docker daemon if not running
             sudo systemctl start docker
-            sudo systemctl enable docker
-            
-            # add user to docker group if not already added
-            sudo usermod -aG docker ubuntu
-            
-            # ensure Docker is running
-            sudo systemctl status docker
-            
-            # stop existing containers and remove volumes
-            docker compose down -v --remove-orphans
-            
-            # build and start services
-            docker compose up -d --build
+
+            sudo docker compose down -v --remove-orphans
+            sudo docker compose build --no-cache
+
+            sudo docker compose run --rm prisma-migrate
+            sudo docker compose up -d
             EOF

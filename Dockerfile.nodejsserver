@@ -12,5 +12,4 @@ RUN mkdir -p /app/logs
 
 EXPOSE 4000
 
-# Starting both the app and workers and prisma migrations
-CMD ["sh", "-c", "echo 'starting Prisma migration' && npx prisma migrate deploy && echo 'migration completed' && npm run start:workers & npm start"]
+CMD ["sh", "-c", "npm run start:workers & npm start"]
