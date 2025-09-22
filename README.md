@@ -78,7 +78,11 @@ npm run start:workers   # starts background workers
 
 ## Checklist
 
-- [x] API + background jobs + DB
+- [x] API + background jobs using BullMQ + Logs + Postgres DB
 - [x] Dockerized (compose)
-- [x] CI/CD to EC2
-- [x] Frontend deployed (separate)
+- [x] CI/CD using GitHub Actions
+- [x] Backend deployed (AWS EC2)
+- [x] Frontend deployed (Vercel)
+- [x] Per-user history (browser UUID stored in local storage)
+- [x] Used Gemini LLM API
+- [x] Documentation
