@@ -69,7 +69,7 @@ const getResultOfTopic = async (req, res) => {
         })
     }
 
-    const topic = await prisma.task.findMany({
+    const topic = await prisma.task.findFirst({
         where: {
             id: topicId,
             user: user
@@ -98,6 +98,8 @@ const getResultOfTopic = async (req, res) => {
             }
         }
     });
+
+    // console.log(JSON.stringify(topic));
 
     if (!topic) {
         return res.status(404).json({
