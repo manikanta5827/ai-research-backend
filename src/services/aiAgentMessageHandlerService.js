@@ -14,7 +14,7 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 const FAST_API_MICROSERVICE_PATH = process.env.FAST_API_MICROSERVICE_PATH || "http://localhost:8000";
 const MIN_TOPIC_LENGTH = 3;
-const MAX_WEB_REQUESTS = 5;
+const MAX_WEB_REQUESTS = 10;
 
 if (!FAST_API_MICROSERVICE_PATH) {
     throw new Error("FAST_API_MICROSERVICE_PATH is not defined in env file");
@@ -35,7 +35,7 @@ async function validateTopic(id, topic) {
 
 async function searchUsingDuckDuck(id, topic) {
     console.log(`searching in web using duck duck go`);
-    await updateLogs(id, 'web_search', "querying duck duck for top 5 urls", { "url": FAST_API_MICROSERVICE_PATH });
+    await updateLogs(id, 'web_search', `querying duck duck for top ${MAX_WEB_REQUESTS} urls`, { "url": FAST_API_MICROSERVICE_PATH });
 
     const body = {
         topic,
@@ -62,6 +62,9 @@ async function searchUsingDuckDuck(id, topic) {
         return true;
     })
 
+    // fetch only 5 results
+    data = data.slice(0,5);
+    
     // get only urls from the response
     let urls = [];
     data.forEach(webpage => {
