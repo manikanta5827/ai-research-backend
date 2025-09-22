@@ -66,7 +66,7 @@ const aiAgentMessageHandler = async (job) => {
     } catch (error) {
         logger.info(`Error happened in job id:: ${job.id} due to ${error.message}`);
         await updateProgress(job.data.id, 0, taskStatus.FAILED, true, error.message);
-        await updateFinalTaskResult(id, { error: error.message })
+        await updateFinalTaskResult(job.data.id, { error: error.message })
     }
 }
 

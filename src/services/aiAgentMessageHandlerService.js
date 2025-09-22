@@ -111,6 +111,8 @@ async function generateSummaryUsingLLM(title, content) {
         cleaned = jsonMatch[0];
     }
 
+    cleaned = cleaned.replace(/(\w+):/g, '"$1":');
+
     logger.info(`cleaned JSON: ${cleaned}`);
     try {
         response = JSON.parse(cleaned);
@@ -156,6 +158,9 @@ async function generateSingleSummary(summary, keywords) {
     if (jsonMatch) {
         cleaned = jsonMatch[0];
     }
+
+    // Fix unquoted property names
+    cleaned = cleaned.replace(/(\w+):/g, '"$1":');
 
     logger.info(`cleaned JSON: ${cleaned}`);
     try {
