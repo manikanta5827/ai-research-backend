@@ -53,11 +53,6 @@ const aiAgentMessageHandler = async (job) => {
         }))
         console.log('succesfully hit all llm api calls');
         await updateProgress(id, 75, taskStatus.RUNNING);
-        await updateLogs(id, 'single_ai_summarization', `generating single summary from all webpages`, { 
-            "api": "Gemini",
-            "response_length": response.summary.length,
-            "keywords_count": response.keywords.length
-        });
 
         // console.log(`summary::${summary}`);
         // console.log(`keywords::${keywords}`);
@@ -65,6 +60,12 @@ const aiAgentMessageHandler = async (job) => {
         const response = await generateSingleSummary(summary, keywords);
         final_response.final_synthesis.overview = response.summary;
         final_response.final_synthesis.keywords = response.keywords;
+
+        await updateLogs(id, 'single_ai_summarization', `generated single summary from all webpages`, {
+            "api": "Gemini",
+            "response_length": response.summary.length,
+            "keywords_count": response.keywords.length
+        });
 
         await updateLogs(id, 'completion', `task succeeded`, { "num_articles": data.length, "response_length": response.length });
         await updateProgress(id, 100, taskStatus.SUCCEEDED, true);
