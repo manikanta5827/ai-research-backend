@@ -79,7 +79,7 @@ async function searchUsingDuckDuck(id, topic) {
     return data;
 }
 
-async function generateSummaryUsingLLM(title, content) {
+async function generateSummaryUsingLLM(topic, title, content) {
 
     if(!title) {
         throw new Error("title not provided in generateSummaryUsingLLM function");
@@ -90,7 +90,7 @@ async function generateSummaryUsingLLM(title, content) {
         throw new Error("content not provided in generateSummaryUsingLLM function");
     }
     // send content to llm and ask for keywords and summary in 1-2 lines
-    const prompt = `I am passing you content of a webpage, i need summary and main keywords from it, send me response strictly in this way
+    const prompt = `I am passing you content of a webpage, i need summary and main keywords from the web page relavant to this topic ""${topic}"", send me response strictly in this way
     {
         "summary": "exactly 1-2 lines of summary of the above webpage content",
         "keywords": ["", ""]
@@ -143,7 +143,7 @@ async function generateSummaryUsingLLM(title, content) {
     return response;
 }
 
-async function generateSingleSummary(summary, keywords) {
+async function generateSingleSummary(topic, summary, keywords) {
 
     if(!summary) {
         throw new Error("summary not provided in generateSingleSummary function");
@@ -153,7 +153,7 @@ async function generateSingleSummary(summary, keywords) {
         throw new Error("keywords not provided in generateSingleSummary function");
     }
 
-    const prompt = `I am passing a array of summaries of different web pages and keywords, i need a single summary from all those array of summaries and a single array of keywords
+    const prompt = `I am passing a array of summaries of different web pages and keywords, i need a single summary relavant to this topic ""${topic}"" from all those array of summaries and a single array of keywords
     send me response strictly in this way
     {
         "summary": "exactly 1-3 lines of summary from all the group of summaries",

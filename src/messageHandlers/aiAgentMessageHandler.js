@@ -32,7 +32,7 @@ const aiAgentMessageHandler = async (job) => {
         let summary = [];
         // hit llm for every web page to get summary
         await Promise.all(data.map(async (webpage, index) => {
-            const response = await generateSummaryUsingLLM(webpage.title, webpage.content);
+            const response = await generateSummaryUsingLLM(topic, webpage.title, webpage.content);
 
             final_response.articles.push({
                 url: webpage.url,
@@ -57,7 +57,7 @@ const aiAgentMessageHandler = async (job) => {
         // console.log(`summary::${summary}`);
         // console.log(`keywords::${keywords}`);
         // hit single llm api to get final summary
-        const response = await generateSingleSummary(summary, keywords);
+        const response = await generateSingleSummary(topic, summary, keywords);
         final_response.final_synthesis.overview = response.summary;
         final_response.final_synthesis.keywords = response.keywords;
 
