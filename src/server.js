@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const morgan = require('morgan');
 const reqStack = require('request-stack');
 const cors = require('cors');
 const { logMiddleware } = require('./utils/winstonLogger.js');
@@ -12,7 +11,6 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
 app.use(reqStack);
 app.use(logMiddleware);
 
