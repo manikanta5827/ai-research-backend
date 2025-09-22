@@ -41,7 +41,7 @@ def search_urls(query: str, max_results: int = 5) -> List[str]:
         print(f"Error searching: {e}")
         return []
 
-def fetch_article_streaming(url: str, max_length: int = 4000) -> ArticleResponse:
+def fetch_article_streaming(url: str, max_length: int = 5000) -> ArticleResponse:
     start_time = time.time()
     
     try:
