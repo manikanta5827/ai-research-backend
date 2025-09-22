@@ -199,6 +199,7 @@ async function generateSingleSummary(summary, keywords) {
     } catch (err) {
         console.error(`failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
 
+        // testing
         return {
             summary: "failed to parse AI response",
             keywords: ["parsing error"]
