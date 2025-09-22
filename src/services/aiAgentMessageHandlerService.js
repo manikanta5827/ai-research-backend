@@ -116,9 +116,25 @@ async function generateSummaryUsingLLM(title, content) {
     logger.info(`cleaned JSON: ${cleaned}`);
     try {
         response = JSON.parse(cleaned);
+
+        if (!response || typeof response !== 'object') {
+            throw new Error('response is not a valid object');
+        }
+
+        if (!response.summary) {
+            response.summary = "no summary available";
+        }
+        if (!Array.isArray(response.keywords)) {
+            response.keywords = ["no keywords available"];
+        }
+
     } catch (err) {
-        console.error(`Failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
-        throw err;
+        console.error(`failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
+
+        return {
+            summary: "failed to parse AI response",
+            keywords: ["parsing error"]
+        };
     }
 
     return response;
@@ -165,9 +181,25 @@ async function generateSingleSummary(summary, keywords) {
     logger.info(`cleaned JSON: ${cleaned}`);
     try {
         response = JSON.parse(cleaned);
+
+        if (!response || typeof response !== 'object') {
+            throw new Error('response is not a valid object');
+        }
+
+        if (!response.summary) {
+            response.summary = "no summary available";
+        }
+        if (!Array.isArray(response.keywords)) {
+            response.keywords = ["no keywords available"];
+        }
+
     } catch (err) {
-        console.error(`Failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
-        throw err;
+        console.error(`failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
+
+        return {
+            summary: "failed to parse AI response",
+            keywords: ["parsing error"]
+        };
     }
 
     return response;

@@ -45,11 +45,10 @@ const logger = createLogger({
   ),
   transports: [
     new transports.File({ filename: path.join(logDir, 'app.log') }),
-    new transports.Console() // Also log to console for debugging
+    new transports.Console()
   ],
 });
 
-// Log the logger initialization
 logger.info(`Winston logger initialized. Log directory: ${logDir}`);
 
 const logMiddleware = (req, res, next) => {
