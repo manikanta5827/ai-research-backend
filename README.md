@@ -85,4 +85,4 @@ npm run start:workers   # starts background workers
 - [x] Frontend deployed (Vercel)
 - [x] Per-user history (browser UUID stored in local storage)
 - [x] Used Gemini LLM API
-- [x] Documentation
+- [x] Documentatio
