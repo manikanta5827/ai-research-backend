@@ -9,4 +9,7 @@ router.post('/research', authHandler, appController.triggerResearch);
 router.get('/research', authHandler, appController.listAllTopics);
 router.get('/research/:id', authHandler, appController.getResultOfTopic);
 
+// delete a topic
+router.delete('/research/:id', authHandler, appController.deleteTopic);
+
 module.exports = router;

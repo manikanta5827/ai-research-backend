@@ -115,8 +115,47 @@ const getResultOfTopic = async (req, res) => {
     })
 }
 
+const deleteTopic = async (req,res) => {
+    const user = req.user;
+
+    const topicId = req.get('id');
+
+    if (!topicId || topicId === "") {
+        return res.status(404).json({
+            status: "error",
+            message: "topicId is required"
+        })
+    }
+
+    const topic = await prisma.task.findUnique({
+        where: {
+            id: topicId,
+            user: user
+        }
+    })
+
+    if(!topic) {
+        return res.status(404).json({
+            status: "error",
+            message: "topic not found"
+        }) 
+    }
+
+    await prisma.task.delete({
+        where: {
+            id: topic.id
+        }
+    })
+
+    return res.status(200).json({
+        status: "success",
+        message: "topic deleted successfully"
+    })
+}
+
 module.exports = {
     triggerResearch,
     listAllTopics,
-    getResultOfTopic
+    getResultOfTopic,
+    deleteTopic
 };
