@@ -22,10 +22,10 @@ if (!FAST_API_MICROSERVICE_PATH) {
 
 async function validateTopic(id, topic) {
     // validate the topic if it is less than 3 words then don't search
-    await updateLogs(id, 'input_parse', "validated topic", { topic: topic });
+    await updateLogs(id, 'Input Parse', "validated topic", { topic: topic });
 
     if (topic.length < MIN_TOPIC_LENGTH) {
-        await updateLogs(id, 'input_parse', `topic should me more than ${MIN_TOPIC_LENGTH} characters`, { "topic_length": topic.length })
+        await updateLogs(id, 'Input Parse', `topic should me more than ${MIN_TOPIC_LENGTH} characters`, { "topic_length": topic.length })
         throw new Error(`topic should me more than ${MIN_TOPIC_LENGTH} characters`);
     }
 
@@ -35,7 +35,7 @@ async function validateTopic(id, topic) {
 
 async function searchUsingDuckDuck(id, topic) {
     console.log(`searching in web using duck duck go`);
-    await updateLogs(id, 'web_search', `querying duck duck for top ${MAX_WEB_REQUESTS} urls`, { "url": FAST_API_MICROSERVICE_PATH });
+    await updateLogs(id, 'Web Search', `Querying duck duck for top ${MAX_WEB_REQUESTS} urls`, { "url": `https://duckduck.com/${topic}` });
 
     const body = {
         topic,
@@ -72,7 +72,7 @@ async function searchUsingDuckDuck(id, topic) {
     })
     console.table(urls);
 
-    await updateLogs(id, 'web_search', `get results from ${urls.length} websites`, { "urls": urls });
+    await updateLogs(id, 'Web Search', `Extracting content from ${urls.length} websites`, { "urls": urls });
 
     await updateProgress(id, 50, taskStatus.RUNNING);
 
