@@ -161,10 +161,12 @@ async function generateResponse(prompt) {
 
         return {
             summary: "failed to parse AI response",
-            keywords: ["parsing error"]
+            keywords: ["parsing error"],
+            error: true
         };
     }
 
+    response.error = false;
     return response;
 }
 
