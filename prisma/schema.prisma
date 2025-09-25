@@ -29,7 +29,7 @@ model Log {
   meta      Json?
   createdAt DateTime @default(now())
 
-  task Task @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
 model TaskResult {
@@ -38,7 +38,7 @@ model TaskResult {
   result    Json
   createdAt DateTime @default(now())
 
-  task Task @relation(fields: [taskId], references: [id])
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
 enum TaskStatus {
