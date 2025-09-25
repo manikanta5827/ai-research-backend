@@ -45,7 +45,7 @@ const aiAgentMessageHandler = async (job) => {
             keywords.push(response.keywords);
 
             // update progress
-            await updateLogs(id, 'ai_summarization', `sent index ${index + 1} webpage content to Gemini API for summarisation`, {
+            await updateLogs(id, 'ai_summarization', `summarized webpage ${index+1} using Gemini API`, {
                 "api": "Gemini",
                 "response_length": response.summary.length,
                 "keywords_count": response.keywords.length

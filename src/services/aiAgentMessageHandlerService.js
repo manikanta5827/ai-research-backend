@@ -92,55 +92,12 @@ async function generateSummaryUsingLLM(topic, title, content) {
     // send content to llm and ask for keywords and summary in 1-2 lines
     const prompt = `I am passing you content of a webpage, i need summary and main keywords from the web page relavant to this topic ""${topic}"", send me response strictly in this way
     {
-        "summary": "exactly 1-2 lines of summary of the above webpage content",
+        "summary": "exactly 1-3 lines of summary of the above webpage content",
         "keywords": ["", ""]
     }
-    inputs : title :: ${title} ,content = ${content}`;
+    inputs : topic = ${topic}, title = ${title}, content = ${content}`;
 
-    let { text: response } = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-    });
-
-    let cleaned = response
-        .replace(/```json\s*/gi, '')
-        .replace(/```/g, '')
-        .replace(/^\s*```json\s*/gm, '')
-        .replace(/```\s*$/gm, '')
-        .trim();
-
-    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-        cleaned = jsonMatch[0];
-    }
-
-    cleaned = cleaned.replace(/(\w+):/g, '"$1":');
-
-    logger.info(`cleaned JSON: ${cleaned}`);
-    try {
-        response = JSON.parse(cleaned);
-
-        if (!response || typeof response !== 'object') {
-            throw new Error('response is not a valid object');
-        }
-
-        if (!response.summary) {
-            response.summary = "no summary available";
-        }
-        if (!Array.isArray(response.keywords)) {
-            response.keywords = ["no keywords available"];
-        }
-
-    } catch (err) {
-        console.error(`failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
-
-        return {
-            summary: "failed to parse AI response",
-            keywords: ["parsing error"]
-        };
-    }
-
-    return response;
+    return await generateResponse(prompt);
 }
 
 async function generateSingleSummary(topic, summary, keywords) {
@@ -156,11 +113,15 @@ async function generateSingleSummary(topic, summary, keywords) {
     const prompt = `I am passing a array of summaries of different web pages and keywords, i need a single summary relavant to this topic ""${topic}"" from all those array of summaries and a single array of keywords
     send me response strictly in this way
     {
-        "summary": "exactly 1-3 lines of summary from all the group of summaries",
+        "summary": "summary from all the group of summaries",
         "keywords": ["",""]
     }
-    inputs : keywords : ${keywords} , summary :: ${summary}`;
+    inputs : topic = ${topic}, keywords = ${keywords}, summary = ${summary}`;
 
+    return await generateResponse(prompt);
+}
+
+async function generateResponse(prompt) {
     let { text: response } = await ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: prompt,
@@ -178,7 +139,6 @@ async function generateSingleSummary(topic, summary, keywords) {
         cleaned = jsonMatch[0];
     }
 
-    // Fix unquoted property names
     cleaned = cleaned.replace(/(\w+):/g, '"$1":');
 
     logger.info(`cleaned JSON: ${cleaned}`);
@@ -199,7 +159,6 @@ async function generateSingleSummary(topic, summary, keywords) {
     } catch (err) {
         console.error(`failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
 
-        // testing
         return {
             summary: "failed to parse AI response",
             keywords: ["parsing error"]
