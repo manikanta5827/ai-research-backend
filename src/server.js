@@ -3,7 +3,7 @@ const app = express();
 const reqStack = require('request-stack');
 const cors = require('cors');
 const { logMiddleware } = require('./utils/winstonLogger.js');
-const errorHandler = require('./middleware/errorHandler.js');
+const { errorHandler, notFoundRoute } = require('./middleware/errorHandler.js');
 const appRoutes = require('./routes/appRoutes.js');
 require('dotenv').config();
 
@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
 app.use('/', appRoutes);
 
 //error handle
+app.use(notFoundRoute);
 app.use(errorHandler);
 
 

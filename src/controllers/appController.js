@@ -34,16 +34,16 @@ const triggerResearch = async (req, res) => {
     })
 }
 
-const listAllTopics = async (req,res) => {
+const listAllTopics = async (req, res) => {
     const user = req.user;
 
     const topics = await prisma.task.findMany({
-        where:{
+        where: {
             user
         }
     })
 
-    if(!topics) {
+    if (!topics) {
         return res.status(200).json({
             status: "success",
             message: "no topics found"
@@ -57,10 +57,10 @@ const listAllTopics = async (req,res) => {
     })
 }
 
-const getResultOfTopic = async (req, res) => {
+const getTopic = async (req, res) => {
     const user = req.user;
 
-    const topicId = req.get('id');
+    const topicId = req.get('topic_id');
 
     if (!topicId || topicId === "") {
         return res.status(404).json({
@@ -89,12 +89,6 @@ const getResultOfTopic = async (req, res) => {
                     meta: true,
                     createdAt: true
                 }
-            },
-            results: {
-                select: {
-                    result: true,
-                    createdAt: true
-                }
             }
         }
     });
@@ -103,7 +97,7 @@ const getResultOfTopic = async (req, res) => {
 
     if (!topic) {
         return res.status(404).json({
-            status: "success",
+            status: "error",
             message: "topic not found"
         })
     }
@@ -115,7 +109,37 @@ const getResultOfTopic = async (req, res) => {
     })
 }
 
-const deleteTopic = async (req,res) => {
+const getResult = async (req, res) => {
+    const topicId = req.get('topic_id');
+
+    if (!topicId || topicId === "") {
+        return res.status(404).json({
+            status: "error",
+            message: "topicId is required"
+        })
+    }
+
+    const result = await prisma.taskResult.findFirst({
+        where: {
+            taskId: topicId
+        }
+    })
+
+    if (!result) {
+        return res.status(404).json({
+            status: "error",
+            message: "topic not found"
+        })
+    }
+
+    return res.status(200).json({
+        status: "success",
+        message: "result fetched successfully",
+        result: result.result
+    })
+}
+
+const deleteTopic = async (req, res) => {
     const user = req.user;
 
     const topicId = req.get('id');
@@ -134,11 +158,11 @@ const deleteTopic = async (req,res) => {
         }
     })
 
-    if(!topic) {
+    if (!topic) {
         return res.status(404).json({
             status: "error",
             message: "topic not found"
-        }) 
+        })
     }
 
     await prisma.task.delete({
@@ -156,6 +180,7 @@ const deleteTopic = async (req,res) => {
 module.exports = {
     triggerResearch,
     listAllTopics,
-    getResultOfTopic,
+    getTopic,
+    getResult,
     deleteTopic
 };

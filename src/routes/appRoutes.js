@@ -7,7 +7,9 @@ const appController = require('../controllers/appController.js');
 // all routes
 router.post('/research', authHandler, appController.triggerResearch);
 router.get('/research', authHandler, appController.listAllTopics);
-router.get('/research/:id', authHandler, appController.getResultOfTopic);
+router.get('/research/topic', authHandler, appController.getTopic);
+router.get('/research/result', appController.getResult);
+
 
 // delete a topic
 router.delete('/research/:id', authHandler, appController.deleteTopic);

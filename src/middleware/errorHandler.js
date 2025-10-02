@@ -1,5 +1,13 @@
-const {logger} = require('../utils/winstonLogger.js');
+const { logger } = require('../utils/winstonLogger.js');
 const path = require('path');
+
+const notFoundRoute = (req, res) => {
+    return res.status(404).json({
+        status: "error",
+        message: "route not found"
+    })
+}
+
 
 const errorHandler = (err, req, res, next) => {
     let errorMessage = err.message;
@@ -39,4 +47,4 @@ const errorHandler = (err, req, res, next) => {
     });
 }
 
-module.exports = errorHandler;
+module.exports = { notFoundRoute, errorHandler };

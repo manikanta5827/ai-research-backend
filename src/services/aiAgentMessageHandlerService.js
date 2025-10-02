@@ -48,7 +48,7 @@ async function searchUsingDuckDuck(id, topic) {
     let { data } = await axios.post(`${FAST_API_MICROSERVICE_PATH}/search`, body, { headers });
     console.log(`got response from fast api service`);
 
-    if(data.length == 0) {
+    if (data.length == 0) {
         logger.info(`zero results found for the topic ${topic}`);
         throw new Error(`zero results found for the topic ${topic}`);
     }
@@ -56,15 +56,12 @@ async function searchUsingDuckDuck(id, topic) {
     // filter wbsites which return empty content or null
     data = data.filter((webpage, index) => {
         if (webpage.title == null || webpage.title === "" || webpage.content == null || webpage.content === "") {
-            console.log(`skipping index ${index} of url ${webpage.url}`)
+            console.log(`skipping index ${index} of url ${webpage.url} because of empty content`)
             return false;
         }
         return true;
     })
 
-    // fetch only 5 results
-    data = data.slice(0,5);
-    
     // get only urls from the response
     let urls = [];
     data.forEach(webpage => {
@@ -81,42 +78,70 @@ async function searchUsingDuckDuck(id, topic) {
 
 async function generateSummaryUsingLLM(topic, title, content) {
 
-    if(!title) {
+    if (!title) {
         throw new Error("title not provided in generateSummaryUsingLLM function");
     }
 
-    if(!content) {
-        
+    if (!content) {
+
         throw new Error("content not provided in generateSummaryUsingLLM function");
     }
     // send content to llm and ask for keywords and summary in 1-2 lines
-    const prompt = `I am passing you content of a webpage, i need summary and main keywords from the web page relavant to this topic ""${topic}"", send me response strictly in this way
-    {
-        "summary": "exactly 1-3 lines of summary of the above webpage content",
-        "keywords": ["", ""]
-    }
-    inputs : topic = ${topic}, title = ${title}, content = ${content}`;
+    const prompt = `{
+        instructions: "Analyze the given webpage content based on the inputs.",
+        inputs: {
+          topic: ${topic},
+          title: ${title},
+          content: ${content}
+        },
+        requirements: {
+          summary: "Generate a concise summary (exactly 3–5 lines) of the webpage content, relevant to the topic.",
+          keywords: "Extract the main keywords from the content as an array of strings.",
+          validation: "If the webpage content and the title are not aligned or do not match, return only { \"error\": true }."
+        },
+        response_format: {
+          valid: {
+            summary: "string (3–5 lines)",
+            keywords: ["string", "string", "..."]
+          },
+          error: {
+            error: true
+          }
+        }
+      }`;
+    ;
 
     return await generateResponse(prompt);
 }
 
 async function generateSingleSummary(topic, summary, keywords) {
 
-    if(!summary) {
+    if (!summary) {
         throw new Error("summary not provided in generateSingleSummary function");
     }
 
-    if(!keywords) {
+    if (!keywords) {
         throw new Error("keywords not provided in generateSingleSummary function");
     }
 
-    const prompt = `I am passing a array of summaries of different web pages and keywords, i need a single summary relavant to this topic ""${topic}"" from all those array of summaries and a single array of keywords
-    send me response strictly in this way
-    {
-        "summary": "summary from all the group of summaries",
-        "keywords": ["",""]
-    }
-    inputs : topic = ${topic}, keywords = ${keywords}, summary = ${summary}`;
+    const prompt = `{
+        instructions: "Combine multiple webpage summaries and keywords into a single output relevant to the given topic.",
+        inputs: {
+          topic: ${topic},
+          summaries: ${summary},   // array of summaries
+          keywords: ${keywords}    // array of keywords
+        },
+        requirements: {
+          summary: "Generate one concise summary (5–7 lines) that captures the overall meaning from all provided summaries, ensuring it is relevant to the topic.",
+          keywords: "Merge and deduplicate all keywords into a single array of the most important ones."
+        },
+        response_format: {
+          valid: {
+            summary: "string (5–7 lines)",
+            keywords: ["string", "string", "..."]
+          }
+        }
+      }`;
 
     return await generateResponse(prompt);
 }
@@ -139,9 +164,6 @@ async function generateResponse(prompt) {
         cleaned = jsonMatch[0];
     }
 
-    cleaned = cleaned.replace(/(\w+):/g, '"$1":');
-
-    logger.info(`cleaned JSON: ${cleaned}`);
     try {
         response = JSON.parse(cleaned);
 
@@ -149,25 +171,21 @@ async function generateResponse(prompt) {
             throw new Error('response is not a valid object');
         }
 
-        if (!response.summary) {
-            response.summary = "no summary available";
-        }
-        if (!Array.isArray(response.keywords)) {
-            response.keywords = ["no keywords available"];
+        if (response.error == true || !response.summary || !Array.isArray(response.keywords)) {
+            return {
+                status: false
+            }
         }
 
+        response.status = true;
+        return response;
     } catch (err) {
         console.error(`failed to parse LLM response as JSON: ${err?.message}\nRaw: ${response}\nCleaned: ${cleaned}`);
 
         return {
-            summary: "failed to parse AI response",
-            keywords: ["parsing error"],
-            error: true
-        };
+            status: false
+        }
     }
-
-    response.error = false;
-    return response;
 }
 
 module.exports = { validateTopic, searchUsingDuckDuck, generateSummaryUsingLLM, generateSingleSummary };

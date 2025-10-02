@@ -4,24 +4,8 @@ const fs = require('fs');
 
 let logDir = path.join(process.cwd(), "logs");
 
-try {
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-    console.log(`created logs directory: ${logDir}`);
-  }
-} catch (error) {
-  console.error(`failed to create logs directory: ${error.message}`);
-  logDir = path.join(process.cwd(), "temp_logs");
-  try {
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-      console.log(`created fallback logs directory: ${logDir}`);
-    }
-  } catch (fallbackError) {
-    console.error(`failed to create fallback logs directory: ${fallbackError.message}`);
-    logDir = require('os').tmpdir();
-    console.log(`using system temp directory for logs: ${logDir}`);
-  }
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
 const levels = {
@@ -44,8 +28,7 @@ const logger = createLogger({
     customFormat
   ),
   transports: [
-    new transports.File({ filename: path.join(logDir, 'app.log') }),
-    new transports.Console()
+    new transports.File({ filename: path.join(logDir, 'app.log') })
   ],
 });
 

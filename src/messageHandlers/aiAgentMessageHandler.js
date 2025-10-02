@@ -34,17 +34,17 @@ const aiAgentMessageHandler = async (job) => {
         await Promise.all(data.map(async (webpage, index) => {
             const response = await generateSummaryUsingLLM(topic, webpage.title, webpage.content);
 
-            if(!response.error) {
+            if (response.status) {
                 final_response.articles.push({
                     url: webpage.url,
                     title: webpage.title,
                     summary: response.summary,
                     keywords: response.keywords
                 })
-            }
 
-            summary.push(response.summary);
-            keywords.push(response.keywords);
+                summary.push(response.summary);
+                keywords.push(response.keywords);
+            }
         }))
         console.log('succesfully hit all llm api calls');
         await updateProgress(id, 75, taskStatus.RUNNING);
