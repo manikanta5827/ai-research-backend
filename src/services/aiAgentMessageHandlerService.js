@@ -96,13 +96,13 @@ async function generateSummaryUsingLLM(topic, title, content) {
         },
         requirements: {
           summary: "Generate a concise summary (exactly 3–5 lines) of the webpage content, relevant to the topic.",
-          keywords: "Extract the main keywords from the content as an array of strings.",
+          keywords: "Extract the main keywords from the content as an array of strings of 2.",
           validation: "If the webpage content and the title are not aligned or do not match, return only { \"error\": true }."
         },
         response_format: {
           valid: {
             summary: "string (3–5 lines)",
-            keywords: ["string", "string", "..."]
+            keywords: ["string", "string", "..."] of size 2
           },
           error: {
             error: true
@@ -133,12 +133,12 @@ async function generateSingleSummary(topic, summary, keywords) {
         },
         requirements: {
           summary: "Generate one concise summary (5–7 lines) that captures the overall meaning from all provided summaries, ensuring it is relevant to the topic.",
-          keywords: "Merge and deduplicate all keywords into a single array of the most important ones."
+          keywords: "Merge and deduplicate all keywords into a single array of the most important ones of upto 5 words."
         },
         response_format: {
           valid: {
             summary: "string (5–7 lines)",
-            keywords: ["string", "string", "..."]
+            keywords: ["string", "string", "..."] of size 5
           }
         }
       }`;
