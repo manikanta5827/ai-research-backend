@@ -34,7 +34,7 @@ async function validateTopic(id, topic) {
 }
 
 async function searchUsingDuckDuck(id, topic) {
-    console.log(`searching in web using duck duck go`);
+    logger.info(`searching in web using duck duck go`);
     await updateLogs(id, 'Web Search', `Querying duck duck for top ${MAX_WEB_REQUESTS} urls`, { "url": `https://duckduck.com/${topic}` });
 
     const body = {
@@ -46,7 +46,7 @@ async function searchUsingDuckDuck(id, topic) {
     }
 
     let { data } = await axios.post(`${FAST_API_MICROSERVICE_PATH}/search`, body, { headers });
-    console.log(`got response from fast api service`);
+    logger.info(`got response from fast api service`);
 
     if (data.length == 0) {
         logger.info(`zero results found for the topic ${topic}`);
@@ -56,7 +56,7 @@ async function searchUsingDuckDuck(id, topic) {
     // filter wbsites which return empty content or null
     data = data.filter((webpage, index) => {
         if (webpage.title == null || webpage.title === "" || webpage.content == null || webpage.content === "") {
-            console.log(`skipping index ${index} of url ${webpage.url} because of empty content`)
+            logger.info(`skipping index ${index} of url ${webpage.url} because of empty content`)
             return false;
         }
         return true;

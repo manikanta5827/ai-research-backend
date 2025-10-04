@@ -1,5 +1,3 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 require('dotenv').config();
 const { logger } = require('../utils/winstonLogger.js');
 const { updateLogs } = require('../repository/logsRepository.js');
@@ -46,7 +44,7 @@ const aiAgentMessageHandler = async (job) => {
                 keywords.push(response.keywords);
             }
         }))
-        console.log('succesfully hit all llm api calls');
+        logger.info('succesfully hit all llm api calls');
         await updateProgress(id, 75, taskStatus.RUNNING);
 
         await updateLogs(id, 'AI Summarization', `Generating single summary from all webpages`, {
@@ -61,7 +59,7 @@ const aiAgentMessageHandler = async (job) => {
         await updateProgress(id, 100, taskStatus.SUCCEEDED, true);
         await updateFinalTaskResult(id, final_response);
 
-        console.log(`topic fetching completed for the job of id::${job.id}`);
+        logger.info(`topic fetching completed for the job of id::${job.id}`);
         return { result: "topic fetching completed", taskId: id };
     } catch (error) {
         logger.info(`Error happened in job id:: ${job.id} due to ${error.message}`);

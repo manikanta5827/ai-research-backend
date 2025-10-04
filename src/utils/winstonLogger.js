@@ -28,7 +28,14 @@ const logger = createLogger({
     customFormat
   ),
   transports: [
-    new transports.File({ filename: path.join(logDir, 'app.log') })
+    new transports.File({ filename: path.join(logDir, 'app.log') }),
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.timestamp(),
+        customFormat
+      )
+    }),
   ],
 });
 

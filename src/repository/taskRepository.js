@@ -38,10 +38,22 @@ async function updateProgress(id, progress, status, completedAt = false, error =
         data.error = (error instanceof Error ? error.message : error) ?? "Something went wrong";
     }
 
+    const task = await prisma.task.findFirst({
+        where: {
+            id: id
+        }
+    })
+
+    if(!task) {
+        logger.info(`task updation failed , reason:: task not found of id ${id} and data ${data}`);
+        return
+    }
+    
     await prisma.task.update({
         where: { id },
         data: data
     })
+    logger.info(`task updation completed of id ${id}`);
 }
 
 module.exports = { updateProgress };
