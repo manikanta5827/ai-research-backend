@@ -14,7 +14,17 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 const FAST_API_MICROSERVICE_PATH = process.env.FAST_API_MICROSERVICE_PATH || "http://localhost:8000";
 const MIN_TOPIC_LENGTH = 3;
-const MAX_WEB_REQUESTS = 10;
+const MAX_WEB_REQUESTS = 5;
+
+const RESEARCH_SITES = [
+    'reddit.com',
+    'stackoverflow.com',
+    'wikipedia.org',
+    'medium.com',
+    'github.com',
+    'dev.to',
+    'quora.com'
+];
 
 if (!FAST_API_MICROSERVICE_PATH) {
     throw new Error("FAST_API_MICROSERVICE_PATH is not defined in env file");
@@ -35,10 +45,15 @@ async function validateTopic(id, topic) {
 
 async function searchUsingDuckDuck(id, topic) {
     logger.info(`searching in web using duck duck go`);
-    await updateLogs(id, 'Web Search', `Querying duck duck for top ${MAX_WEB_REQUESTS} urls`, { "url": `https://duckduck.com/${topic}` });
+    
+    // Construct site-specific query
+    const siteQuery = RESEARCH_SITES.map(site => `site:${site}`).join(' OR ');
+    const enrichedTopic = `(${siteQuery}) ${topic}`;
+
+    await updateLogs(id, 'Web Search', `Querying duck duck for top ${MAX_WEB_REQUESTS} urls`, { "query": enrichedTopic });
 
     const body = {
-        topic,
+        topic: enrichedTopic,
         "max_results": MAX_WEB_REQUESTS
     }
     const headers = {
@@ -76,72 +91,43 @@ async function searchUsingDuckDuck(id, topic) {
     return data;
 }
 
-async function generateSummaryUsingLLM(topic, title, content) {
-
-    if (!title) {
-        throw new Error("title not provided in generateSummaryUsingLLM function");
+async function generateCombinedAnalysis(topic, articles) {
+    if (!articles || articles.length === 0) {
+        throw new Error("No articles provided for analysis");
     }
 
-    if (!content) {
-
-        throw new Error("content not provided in generateSummaryUsingLLM function");
-    }
-    // send content to llm and ask for keywords and summary in 1-2 lines
-    const prompt = `{
-        instructions: "Analyze the given webpage content based on the inputs.",
-        inputs: {
-          topic: ${topic},
-          title: ${title},
-          content: ${content}
-        },
-        requirements: {
-          summary: "Generate a concise summary (exactly 3–5 lines) of the webpage content, relevant to the topic.",
-          keywords: "Extract the main keywords from the content as an array of strings of 2.",
-          validation: "If the webpage content and the title are not aligned or do not match, return only { \"error\": true }."
-        },
-        response_format: {
-          valid: {
-            summary: "string (3–5 lines)",
-            keywords: ["string", "string", "..."] of size 2
-          },
-          error: {
-            error: true
-          }
-        }
-      }`;
-    ;
-
-    return await generateResponse(prompt);
-}
-
-async function generateSingleSummary(topic, summary, keywords) {
-
-    if (!summary) {
-        throw new Error("summary not provided in generateSingleSummary function");
-    }
-
-    if (!keywords) {
-        throw new Error("keywords not provided in generateSingleSummary function");
-    }
+    const articlesInput = articles.map(a => ({
+        url: a.url,
+        title: a.title,
+        content: a.content
+    }));
 
     const prompt = `{
-        instructions: "Combine multiple webpage summaries and keywords into a single output relevant to the given topic.",
+        instructions: "You are an expert researcher. Analyze the provided ${articles.length} web articles related to the topic '${topic}'. Return a SINGLE JSON object containing a summary for EACH article and a final synthesized overview.",
         inputs: {
-          topic: ${topic},
-          summaries: ${summary},   // array of summaries
-          keywords: ${keywords}    // array of keywords
+            topic: "${topic}",
+            articles: ${JSON.stringify(articlesInput)}
         },
         requirements: {
-          summary: "Generate one concise summary (5–7 lines) that captures the overall meaning from all provided summaries, ensuring it is relevant to the topic.",
-          keywords: "Merge and deduplicate all keywords into a single array of the most important ones of upto 5 words."
+            article_analysis: "For each article in the input array, provide a summary (3-5 lines) and 2 keywords. If the content is irrelevant or error-prone, mark error: true.",
+            final_synthesis: "Generate one concise master summary (5-7 lines) that captures the overall meaning from all valid articles. Merge and deduplicate keywords into a single array of top 5 keywords."
         },
         response_format: {
-          valid: {
-            summary: "string (5–7 lines)",
-            keywords: ["string", "string", "..."] of size 5
-          }
+            articles: [
+                {
+                    url: "string (must match input url)",
+                    title: "string (must match input title)",
+                    summary: "string (3-5 lines)",
+                    keywords: ["string", "string"],
+                    error: false
+                }
+            ],
+            final_synthesis: {
+                overview: "string (5-7 lines)",
+                keywords: ["string", "string", "string", "string", "string"]
+            }
         }
-      }`;
+    }`;
 
     return await generateResponse(prompt);
 }
@@ -171,7 +157,7 @@ async function generateResponse(prompt) {
             throw new Error('response is not a valid object');
         }
 
-        if (response.error == true || !response.summary || !Array.isArray(response.keywords)) {
+        if (response.error === true) {
             return {
                 status: false
             }
@@ -188,4 +174,4 @@ async function generateResponse(prompt) {
     }
 }
 
-module.exports = { validateTopic, searchUsingDuckDuck, generateSummaryUsingLLM, generateSingleSummary };
+module.exports = { validateTopic, searchUsingDuckDuck, generateCombinedAnalysis };

@@ -49,7 +49,7 @@ def fetch_article_streaming(url: str, max_length: int = 7000) -> ArticleResponse
             'User-Agent': 'Mozilla/5.0 (compatible; FastAPI-Scraper/1.0)'
         }
         
-        response = requests.get(url, headers=headers, stream=True, timeout=10)
+        response = requests.get(url, headers=headers, stream=True, timeout=5)
         response.raise_for_status()
         
         content_chunks = []

@@ -4,7 +4,7 @@ const { updateLogs } = require('../repository/logsRepository.js');
 const { updateProgress } = require('../repository/taskRepository.js');
 const { updateFinalTaskResult } = require("../repository/taskResultRepository.js")
 const { taskStatus } = require('../enums/taskStatusEnum.js');
-const { validateTopic, searchUsingDuckDuck, generateSummaryUsingLLM, generateSingleSummary } = require('../services/aiAgentMessageHandlerService.js');
+const { validateTopic, searchUsingDuckDuck, generateCombinedAnalysis } = require('../services/aiAgentMessageHandlerService.js');
 
 
 const aiAgentMessageHandler = async (job) => {
@@ -17,6 +17,17 @@ const aiAgentMessageHandler = async (job) => {
         // fetch content from websites using duck duck fast api server
         const data = await searchUsingDuckDuck(id, topic);
 
+        await updateLogs(id, 'AI Summarization', `Analyzing ${data.length} articles and generating synthesis`, {
+            "api": "Gemini"
+        });
+        
+        // hit single llm api to get all summaries and final synthesis
+        const llmResponse = await generateCombinedAnalysis(topic, data);
+
+        if (!llmResponse.status) {
+            throw new Error("Failed to generate analysis from LLM");
+        }
+
         let final_response = {
             topic: topic,
             articles: [],
@@ -26,35 +37,17 @@ const aiAgentMessageHandler = async (job) => {
             }
         };
 
-        let keywords = [];
-        let summary = [];
-        // hit llm for every web page to get summary
-        await Promise.all(data.map(async (webpage, index) => {
-            const response = await generateSummaryUsingLLM(topic, webpage.title, webpage.content);
+        if (llmResponse.articles) {
+            llmResponse.articles.forEach(article => {
+                if (!article.error) {
+                    final_response.articles.push(article);
+                }
+            });
+        }
 
-            if (response.status) {
-                final_response.articles.push({
-                    url: webpage.url,
-                    title: webpage.title,
-                    summary: response.summary,
-                    keywords: response.keywords
-                })
-
-                summary.push(response.summary);
-                keywords.push(response.keywords);
-            }
-        }))
-        logger.info('succesfully hit all llm api calls');
-        await updateProgress(id, 75, taskStatus.RUNNING);
-
-        await updateLogs(id, 'AI Summarization', `Generating single summary from all webpages`, {
-            "api": "Gemini"
-        });
-
-        // hit single llm api to get final summary
-        const response = await generateSingleSummary(topic, summary, keywords);
-        final_response.final_synthesis.overview = response.summary;
-        final_response.final_synthesis.keywords = response.keywords;
+        if (llmResponse.final_synthesis) {
+            final_response.final_synthesis = llmResponse.final_synthesis;
+        }
 
         await updateProgress(id, 100, taskStatus.SUCCEEDED, true);
         await updateFinalTaskResult(id, final_response);
